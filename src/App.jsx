@@ -13,8 +13,9 @@ export default function App() {
     setMode('navigating')
 
     startLoop(async (frame) => {
-      const description = await analyzeFrame(frame)
-      console.log('GPT-4o says:', description)
+      const result = await analyzeFrame(frame, 'navigate')
+      console.log('result:', result)
+      console.log('frame size:', frame.length)
     })
   }
 
