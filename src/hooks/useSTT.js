@@ -1,14 +1,14 @@
 import { useState, useRef } from 'react'
-import { transcribeAudio } from '../utils/api'
+import { transcribeAudio } from '../services/openai'
 
 export function useSTT() {
-  const [isRecording, setIsRecording]       = useState(false)
-  const [transcript, setTranscript]         = useState('')
+  const [isRecording, setIsRecording] = useState(false)
+  const [transcript, setTranscript] = useState('')
   const [isTranscribing, setIsTranscribing] = useState(false)
-  const [error, setError]                   = useState(null)
+  const [error, setError] = useState(null)
 
   const mediaRecorderRef = useRef(null)
-  const audioChunksRef   = useRef([])
+  const audioChunksRef = useRef([])
 
   const startRecording = async () => {
     setError(null)
