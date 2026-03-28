@@ -1,11 +1,17 @@
-export default function CameraView({ videoRef }) {
+export default function CameraView({ videoRef, canvasRef }) {
     return (
-        <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            muted
-            className="w-full h-full object-cover"
-        />
+        <div className="w-full h-full">
+            <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                className="w-full h-full object-cover"
+            />
+            <canvas
+                ref={canvasRef}
+                className="hidden"
+            />
+        </div>
     )
 }
