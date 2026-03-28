@@ -1,61 +1,27 @@
-import { NAVIGATE_PROMPT, ASK_PROMPT } from '../utils/prompts'
+import { describeScene, answerQuestion } from '../services/openai'
 
 export function useVisionAI() {
 
     async function analyzeFrame(base64, mode = 'navigate', question = '') {
-        const apiKey = import.meta.env.VITE_OPENAI_API_KEY
 
-        const isAsk = mode === 'ask'
-        const model = isAsk
-            ? import.meta.env.VITE_OPENAI_ASK_MODEL
-            : import.meta.env.VITE_OPENAI_NAVIGATE_MODEL
+        // Strip the data:image/jpeg;base64, prefix if present
+        // Person B's service expects raw base64, not the full data URL
+        const rawBase64 = base64.includes(',')
+            ? base64.split(',')[1]
+            : base64
 
-        const promptText = isAsk
-            ? `${ASK_PROMPT}\n\nUser's question: ${question}`
-            : NAVIGATE_PROMPT
+        let text
 
-        const maxTokens = isAsk ? 150 : 100
-
-        const response = await fetch(
-            'https://api.openai.com/v1/chat/completions',
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKey}`
-                },
-                body: JSON.stringify({
-                    model: model,
-                    max_tokens: maxTokens,
-                    messages: [
-                        {
-                            role: 'user',
-                            content: [
-                                {
-                                    type: 'text',
-                                    text: promptText
-                                },
-                                {
-                                    type: 'image_url',
-                                    image_url: {
-                                        url: base64,
-                                        detail: isAsk ? 'high' : 'low'
-                                    }
-                                }
-                            ]
-                        }
-                    ]
-                })
-            }
-        )
-
-        const data = await response.json()
-        const text = data.choices[0].message.content.trim()
+        if (mode === 'ask') {
+            text = await answerQuestion(rawBase64, question)
+        } else {
+            text = await describeScene(rawBase64)
+        }
 
         return {
             text,
-            isAlert: text.startsWith('ALERT:'),
-            isClear: text === 'CLEAR'
+            isAlert: text.toLowerCase().startsWith('alert:'),
+            isClear: text.toLowerCase().includes('path clear') || text === 'CLEAR'
         }
     }
 

@@ -1,16 +1,7 @@
+import { NAVIGATE_PROMPT, ASK_PROMPT } from '../utils/prompts'
+
 const BASE = 'https://api.openai.com/v1';
 const apiKey = () => import.meta.env.VITE_OPENAI_API_KEY;
-
-const NAVIGATE_PROMPT =
-  'You are assisting a blind person navigating with their phone camera. ' +
-  'Describe what is directly ahead in 1-2 short sentences. ' +
-  'Focus on: obstacles, steps, curbs, doors, signs, people, hazards. ' +
-  'If the path appears clear, say only "Path clear." Be direct and actionable.';
-
-const ASK_PROMPT =
-  'You are a visual assistant for a blind person. ' +
-  'Answer their question about what you see in the image clearly and specifically. ' +
-  'Keep your answer to 2-4 sentences.';
 
 export async function describeScene(base64Jpeg) {
   const res = await fetch(`${BASE}/chat/completions`, {
@@ -83,7 +74,11 @@ export async function textToSpeech(text) {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${apiKey()}`,
     },
-    body: JSON.stringify({ model: 'tts-1', voice: 'nova', input: text }),
+    body: JSON.stringify({
+      model: 'tts-1',
+      voice: 'nova',
+      input: text
+    }),
   });
   if (!res.ok) throw new Error(`TTS API error ${res.status}`);
   const blob = await res.blob();
