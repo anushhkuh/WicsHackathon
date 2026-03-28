@@ -1,20 +1,21 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useCamera } from './hooks/useCamera'
 import { useVisionAI } from './hooks/useVisionAI'
 import { useTTS } from './hooks/useTTS'
+import { useSTT } from './hooks/useSTT'
 import CameraView from './components/CameraView'
 import StatusBanner from './components/StatusBanner'
 import AskButton from './components/AskButton'
+
 export default function App() {
   const [mode, setMode] = useState('idle')
-  const { videoRef, canvasRef, startCamera, startLoop, stopLoop } = useCamera()
+  const { videoRef, canvasRef, startCamera, startLoop, stopLoop, captureFrame } = useCamera()
   const { analyzeFrame } = useVisionAI()
   const { speak, stop, unlock } = useTTS()
-  const isSpeakingRef = useRef(false)
+  const { startRecording, stopRecording, transcript, isTranscribing } = useSTT()
 
-  function handleAskTap() {
-    console.log('Ask tapped — mode:', mode)
-  }
+  const isSpeakingRef = useRef(false)
+  const isAskingRef = useRef(false)
 
   async function handleStart() {
     unlock()
@@ -22,7 +23,8 @@ export default function App() {
     setMode('navigating')
 
     startLoop(async (frame) => {
-      if (isSpeakingRef.current) return
+      // skip if asking or speaking
+      if (isSpeakingRef.current || isAskingRef.current) return
 
       const result = await analyzeFrame(frame, 'navigate')
 
@@ -46,11 +48,63 @@ export default function App() {
     })
   }
 
+  async function handleAskTap() {
+    // if currently listening — stop recording
+    if (mode === 'listening') {
+      stopRecording()
+      return
+    }
+
+    // if navigating — start asking
+    if (mode === 'navigating') {
+      isAskingRef.current = true
+      stop() // stop any current navigation audio
+      setMode('listening')
+
+      try {
+        await startRecording()
+      } catch (err) {
+        console.error('Mic error:', err)
+        setMode('navigating')
+        isAskingRef.current = false
+      }
+    }
+  }
+
+  // watch for transcript to be ready after recording stops
+  useEffect(() => {
+    if (!isTranscribing && transcript && mode === 'listening') {
+      handleAnswer(transcript)
+    }
+  }, [transcript, isTranscribing])
+
+  async function handleAnswer(question) {
+    setMode('answering')
+
+    try {
+      // capture current frame
+      const frame = captureFrame()
+      if (!frame) throw new Error('No frame available')
+
+      // get answer from GPT-4o
+      const result = await analyzeFrame(frame, 'ask', question)
+
+      // speak the answer
+      isSpeakingRef.current = true
+      await speak(result.text)
+
+    } catch (err) {
+      console.error('Answer error:', err)
+    } finally {
+      isSpeakingRef.current = false
+      isAskingRef.current = false
+      setMode('navigating')
+    }
+  }
+
   return (
     <div className="relative w-screen h-screen bg-black">
-
       <CameraView videoRef={videoRef} canvasRef={canvasRef} />
-
       <StatusBanner mode={mode} />
 
       {mode === 'idle' && (
@@ -68,7 +122,6 @@ export default function App() {
       )}
 
       <AskButton mode={mode} onTap={handleAskTap} />
-
     </div>
   )
 }
