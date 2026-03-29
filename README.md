@@ -6,6 +6,11 @@ VoiceGuide is a camera-based assistive application that helps blind and low-visi
 
 ---
 
+## Purpose
+
+VoiceGuide aims to improve accessibility by enabling greater independence for visually impaired individuals through real-time, AI-driven assistance.
+---
+
 ## Overview
 
 VoiceGuide provides two primary modes:
@@ -167,8 +172,4 @@ Open `https://wics-hackathon-kappa.vercel.app/`
 
 Developed during the WiCS Hackathon by a team focused on accessibility and applied artificial intelligence.
 
----
 
-## Purpose
-
-VoiceGuide aims to improve accessibility by enabling greater independence for visually impaired individuals through real-time, AI-driven assistance.
