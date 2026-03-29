@@ -2,7 +2,7 @@
 
 AI-powered navigation companion for blind and low-vision users.
 
-Point your camera at your surroundings and VoiceGuide will 
+Point your camera at your surroundings, and VoiceGuide will 
 describe what it sees in real time. Tap Ask to ask any question 
 about what you see or hold up to the camera.
 
@@ -31,13 +31,7 @@ about what you see or hold up to the camera.
 4. Run locally
    npm run dev
 
-5. Open http://localhost:5173
-
-## Deploy
-
-Push to GitHub — Vercel auto-deploys.
-Add environment variables in Vercel dashboard under 
-Project Settings → Environment Variables.
+5. Deployed link: https://wics-hackathon-kappa.vercel.app/
 
 ## Tech Stack
 
