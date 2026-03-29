@@ -35,7 +35,7 @@ export function useCamera() {
             const frame = captureFrame()
             if (!frame) return  // skip if video not ready yet
             onFrame(frame)
-        }, 800)
+        }, 3000)
     }
 
     function stopLoop() {
